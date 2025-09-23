@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SimpleNotes - Lightweight Note-Taking App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #7209b7;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+            --border-radius: 8px;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo i {
+            font-size: 1.8rem;
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .github-link {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 30px;
+            transition: var(--transition);
+        }
+
+        .github-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .app-content {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            min-height: 70vh;
+        }
+
+        @media (max-width: 768px) {
+            .app-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .sidebar {
+            background: var(--light);
+            border-right: 1px solid var(--light-gray);
+            padding: 1.5rem;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-card i {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .stat-card .count {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .stat-card .label {
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        .filters {
+            margin-top: 20px;
+        }
+
+        .filter-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .filter-option:hover {
+            background: rgba(67, 97, 238, 0.1);
+        }
+
+        .filter-option.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .filter-option.active i {
+            color: white;
+        }
+
+        .main-content {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid var(--light-gray);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .search-bar input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .search-bar button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 0 20px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .search-bar button:hover {
+            background: var(--primary-dark);
+        }
+
+        .notes-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .notes-title {
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        .sort-options select {
+            padding: 8px 12px;
+            border: 1px solid var(--light-gray);
+            border-radius: var(--border-radius);
+            background: white;
+        }
+
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .note-card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 1.2rem;
+            transition: var(--transition);
+            border-left: 4px solid var(--primary);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .note-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .note-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .note-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            color: var(--dark);
+        }
+
+        .note-date {
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        .note-content {
+            color: var(--dark);
+            flex-grow: 1;
+            margin-bottom: 15px;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
+        }
+
+        .note-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .note-actions button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 5px;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+
+        .btn-edit {
+            color: var(--primary);
+        }
+
+        .btn-edit:hover {
+            background: rgba(67, 97, 238, 0.1);
+        }
+
+        .btn-delete {
+            color: var(--danger);
+        }
+
+        .btn-delete:hover {
+            background: rgba(247, 37, 133, 0.1);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--gray);
+            grid-column: 1 / -1;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: modalAppear 0.3s ease;
+        }
+
+        @keyframes modalAppear {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--light-gray);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-weight: 600;
+            font-size: 1.3rem;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--light-gray);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .form-group textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--light-gray);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--light-gray);
+            color: var(--dark);
+        }
+
+        .btn-secondary:hover {
+            background: #dde1e7;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            color: white;
+            font-weight: 600;
+            z-index: 1100;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: var(--success);
+        }
+
+        .notification.error {
+            background: var(--danger);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-sticky-note"></i>
+                <h1>SimpleNotes</h1>
+            </div>
+            <a href="#" class="github-link">
+                <i class="fab fa-github"></i>
+                GitHub Repository
+            </a>
+        </header>
+
+        <div class="app-content">
+            <div class="sidebar">
+                <div class="stats">
+                    <div class="stat-card">
+                        <i class="fas fa-sticky-note"></i>
+                        <div class="count" id="totalNotes">12</div>
+                        <div class="label">Total Notes</div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-calendar-day"></i>
+                        <div class="count" id="todayNotes">3</div>
+                        <div class="label">Today's Notes</div>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" style="width: 100%; margin-bottom: 20px;" id="addNoteBtn">
+                    <i class="fas fa-plus"></i> Add New Note
+                </button>
+
+                <div class="filters">
+                    <div class="filter-title">
+                        <i class="fas fa-filter"></i>
+                        Filter Notes
+                    </div>
+                    <div class="filter-options">
+                        <div class="filter-option active" data-filter="all">
+                            <i class="fas fa-th-list"></i>
+                            All Notes
+                        </div>
+                        <div class="filter-option" data-filter="today">
+                            <i class="fas fa-calendar-day"></i>
+                            Today
+                        </div>
+                        <div class="filter-option" data-filter="week">
+                            <i class="fas fa-calendar-week"></i>
+                            This Week
+                        </div>
+                        <div class="filter-option" data-filter="important">
+                            <i class="fas fa-star"></i>
+                            Important
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-content">
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="Search notes...">
+                    <button id="searchBtn"><i class="fas fa-search"></i></button>
+                </div>
+
+                <div class="notes-actions">
+                    <div class="notes-title">Your Notes</div>
+                    <div class="sort-options">
+                        <select id="sortSelect">
+                            <option value="newest">Newest First</option>
+                            <option value="oldest">Oldest First</option>
+                            <option value="title">By Title</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="notes-grid" id="notesContainer">
+                    <!-- Notes will be dynamically inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Note Modal -->
+    <div class="modal" id="noteModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">Add New Note</div>
+                <button class="close-modal" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="noteForm">
+                    <input type="hidden" id="noteId">
+                    <div class="form-group">
+                        <label for="noteTitle">Title</label>
+                        <input type="text" id="noteTitle" placeholder="Enter note title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="noteContent">Content</label>
+                        <textarea id="noteContent" placeholder="Enter your note content" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="noteImportant"> Mark as important
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                <button class="btn btn-primary" id="saveNoteBtn">Save Note</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
+    <footer>
+        <p>SimpleNotes - An Open Source Project | Built with HTML, CSS, and JavaScript</p>
+    </footer>
+
+    <script>
+        // Note management functionality
+        class NotesApp {
+            constructor() {
+                this.notes = JSON.parse(localStorage.getItem('simpleNotes')) || [];
+                this.currentFilter = 'all';
+                this.currentSort = 'newest';
+                this.searchQuery = '';
+                this.editingNoteId = null;
+                
+                this.initializeEventListeners();
+                this.updateStats();
+                this.renderNotes();
+            }
+
+            initializeEventListeners() {
+                // Modal controls
+                document.getElementById('addNoteBtn').addEventListener('click', () => this.openModal());
+                document.getElementById('closeModal').addEventListener('click', () => this.closeModal());
+                document.getElementById('cancelBtn').addEventListener('click', () => this.closeModal());
+                
+                // Form submission
+                document.getElementById('saveNoteBtn').addEventListener('click', () => this.saveNote());
+                
+                // Search functionality
+                document.getElementById('searchBtn').addEventListener('click', () => this.handleSearch());
+                document.getElementById('searchInput').addEventListener('keyup', (e) => {
+                    if (e.key === 'Enter') this.handleSearch();
+                });
+                
+                // Filter and sort
+                document.querySelectorAll('.filter-option').forEach(option => {
+                    option.addEventListener('click', (e) => {
+                        document.querySelectorAll('.filter-option').forEach(opt => opt.classList.remove('active'));
+                        e.currentTarget.classList.add('active');
+                        this.currentFilter = e.currentTarget.dataset.filter;
+                        this.renderNotes();
+                    });
+                });
+                
+                document.getElementById('sortSelect').addEventListener('change', (e) => {
+                    this.currentSort = e.target.value;
+                    this.renderNotes();
+                });
+            }
+
+            openModal(noteId = null) {
+                this.editingNoteId = noteId;
+                const modal = document.getElementById('noteModal');
+                const modalTitle = document.getElementById('modalTitle');
+                
+                if (noteId) {
+                    modalTitle.textContent = 'Edit Note';
+                    const note = this.notes.find(n => n.id === noteId);
+                    document.getElementById('noteId').value = note.id;
+                    document.getElementById('noteTitle').value = note.title;
+                    document.getElementById('noteContent').value = note.content;
+                    document.getElementById('noteImportant').checked = note.important || false;
+                } else {
+                    modalTitle.textContent = 'Add New Note';
+                    document.getElementById('noteForm').reset();
+                }
+                
+                modal.style.display = 'flex';
+            }
+
+            closeModal() {
+                document.getElementById('noteModal').style.display = 'none';
+                this.editingNoteId = null;
+            }
+
+            saveNote() {
+                const title = document.getElementById('noteTitle').value.trim();
+                const content = document.getElementById('noteContent').value.trim();
+                const important = document.getElementById('noteImportant').checked;
+
+                if (!title || !content) {
+                    this.showNotification('Please fill in both title and content', 'error');
+                    return;
+                }
+
+                if (this.editingNoteId) {
+                    // Update existing note
+                    const noteIndex = this.notes.findIndex(n => n.id === this.editingNoteId);
+                    this.notes[noteIndex] = {
+                        ...this.notes[noteIndex],
+                        title,
+                        content,
+                        important,
+                        updatedAt: new Date().toISOString()
+                    };
+                    this.showNotification('Note updated successfully!', 'success');
+                } else {
+                    // Add new note
+                    const newNote = {
+                        id: Date.now(),
+                        title,
+                        content,
+                        important,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    };
+                    this.notes.unshift(newNote);
+                    this.showNotification('Note added successfully!', 'success');
+                }
+
+                this.saveNotes();
+                this.updateStats();
+                this.renderNotes();
+                this.closeModal();
+            }
+
+            deleteNote(id) {
+                if (confirm('Are you sure you want to delete this note?')) {
+                    this.notes = this.notes.filter(note => note.id !== id);
+                    this.saveNotes();
+                    this.updateStats();
+                    this.renderNotes();
+                    this.showNotification('Note deleted successfully!', 'success');
+                }
+            }
+
+            handleSearch() {
+                this.searchQuery = document.getElementById('searchInput').value.toLowerCase();
+                this.renderNotes();
+            }
+
+            filterNotes() {
+                let filteredNotes = this.notes;
+
+                // Apply search filter
+                if (this.searchQuery) {
+                    filteredNotes = filteredNotes.filter(note => 
+                        note.title.toLowerCase().includes(this.searchQuery) || 
+                        note.content.toLowerCase().includes(this.searchQuery)
+                    );
+                }
+
+                // Apply category filter
+                const now = new Date();
+                const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                const weekAgo = new Date(today);
+                weekAgo.setDate(weekAgo.getDate() - 7);
+
+                switch (this.currentFilter) {
+                    case 'today':
+                        filteredNotes = filteredNotes.filter(note => {
+                            const noteDate = new Date(note.createdAt);
+                            return noteDate >= today;
+                        });
+                        break;
+                    case 'week':
+                        filteredNotes = filteredNotes.filter(note => {
+                            const noteDate = new Date(note.createdAt);
+                            return noteDate >= weekAgo;
+                        });
+                        break;
+                    case 'important':
+                        filteredNotes = filteredNotes.filter(note => note.important);
+                        break;
+                    // 'all' filter - no additional filtering needed
+                }
+
+                return filteredNotes;
+            }
+
+            sortNotes(notes) {
+                switch (this.currentSort) {
+                    case 'newest':
+                        return notes.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                    case 'oldest':
+                        return notes.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+                    case 'title':
+                        return notes.sort((a, b) => a.title.localeCompare(b.title));
+                    default:
+                        return notes;
+                }
+            }
+
+            renderNotes() {
+                const container = document.getElementById('notesContainer');
+                let filteredNotes = this.filterNotes();
+                filteredNotes = this.sortNotes(filteredNotes);
+
+                if (filteredNotes.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-sticky-note"></i>
+                            <h3>No notes found</h3>
+                            <p>${this.searchQuery ? 'Try adjusting your search terms' : 'Create your first note to get started!'}</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = filteredNotes.map(note => `
+                    <div class="note-card ${note.important ? 'important' : ''}">
+                        <div class="note-header">
+                            <div>
+                                <div class="note-title">${this.escapeHtml(note.title)}</div>
+                                <div class="note-date">${this.formatDate(note.createdAt)}</div>
+                            </div>
+                            ${note.important ? '<i class="fas fa-star" style="color: #ffc107;"></i>' : ''}
+                        </div>
+                        <div class="note-content">${this.escapeHtml(note.content)}</div>
+                        <div class="note-actions">
+                            <button class="btn-edit" onclick="notesApp.openModal(${note.id})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-delete" onclick="notesApp.deleteNote(${note.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            updateStats() {
+                const now = new Date();
+                const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                
+                const totalNotes = this.notes.length;
+                const todayNotes = this.notes.filter(note => {
+                    const noteDate = new Date(note.createdAt);
+                    return noteDate >= today;
+                }).length;
+
+                document.getElementById('totalNotes').textContent = totalNotes;
+                document.getElementById('todayNotes').textContent = todayNotes;
+            }
+
+            formatDate(dateString) {
+                const options = { year: 'numeric', month: 'short', day: 'numeric' };
+                return new Date(dateString).toLocaleDateString(undefined, options);
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            saveNotes() {
+                localStorage.setItem('simpleNotes', JSON.stringify(this.notes));
+            }
+
+            showNotification(message, type) {
+                const notification = document.getElementById('notification');
+                notification.textContent = message;
+                notification.className = `notification ${type}`;
+                notification.classList.add('show');
+
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+        }
+
+        // Initialize the app when the page loads
+        const notesApp = new NotesApp();
+
+        // Close modal when clicking outside of it
+        window.addEventListener('click', (e) => {
+            const modal = document.getElementById('noteModal');
+            if (e.target === modal) {
+                notesApp.closeModal();
+            }
+        });
+
+        // Add some sample notes if there are none
+        if (!localStorage.getItem('simpleNotes') || JSON.parse(localStorage.getItem('simpleNotes')).length === 0) {
+            const sampleNotes = [
+                {
+                    id: 1,
+                    title: "Welcome to SimpleNotes",
+                    content: "This is your first note. You can edit or delete it, or create new ones using the 'Add New Note' button.",
+                    important: true,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                },
+                {
+                    id: 2,
+                    title: "Project Ideas",
+                    content: "Brainstorm ideas for your next project. Consider technologies, timeline, and resources needed.",
+                    important: false,
+                    createdAt: new Date(Date.now() - 86400000).toISOString(), // Yesterday
+                    updatedAt: new Date(Date.now() - 86400000).toISOString()
+                },
+                {
+                    id: 3,
+                    title: "Meeting Notes",
+                    content: "Discuss project requirements with the team. Assign tasks and set deadlines for the first milestone.",
+                    important: true,
+                    createdAt: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
+                    updatedAt: new Date(Date.now() - 172800000).toISOString()
+                }
+            ];
+            localStorage.setItem('simpleNotes', JSON.stringify(sampleNotes));
+            notesApp.notes = sampleNotes;
+            notesApp.updateStats();
+            notesApp.renderNotes();
+        }
+    </script>
+</body>
+</html>
