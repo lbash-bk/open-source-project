@@ -71,7 +71,7 @@ This project is licensed under the MIT License — you’re free to use, modify,
 
 | Name                       | Matric No.      |
 | -------------------------- | --------------- |
-| Bashir Isyaku Lawan        | FCP/CSE/20/1010 |  | GROUP LEADER | GITHUB ACCOUNT: lbash-bk |
+| Bashir Isyaku Lawan - GITHUB ACCOUNT: 'lbash-bk' (GROUP LEADER)       | FCP/CSE/20/1010 |
 | Yakubu Hassan Dangombe     | FCP/CSE/20/1001 |
 | Yusha’u Bilya Kaura        | FCP/CSE/20/1002 |
 | Ismail Khalid              | FCP/CSE/20/1003 |
